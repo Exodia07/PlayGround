@@ -1,19 +1,3 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$PROJECT_DIR"
-PORT="${PORT:-3000}"
-export PORT
-
-: "${OPENCODE_WEB_DIR:?OPENCODE_WEB_DIR must point to the worker metadata directory}"
-mkdir -p "$PROJECT_DIR/dist" "$OPENCODE_WEB_DIR"
-
-# Gradle resolves Android dependencies and performs an incremental debug build.
-/usr/bin/time -p gradle -p "$PROJECT_DIR/android" :app:assembleDebug
-/usr/bin/time -p cp "$PROJECT_DIR/android/app/build/outputs/apk/debug/app-debug.apk" "$PROJECT_DIR/dist/barakel.apk"
-
-/usr/bin/time -p tee "$PROJECT_DIR/dist/index.html" >/dev/null <<'HTML'
 <!doctype html>
 <html lang="en">
 <head>
@@ -54,9 +38,3 @@ for(let i=0;i<54;i++){const a=(i*173+31)%w,b=(i*97+19)%h;x.fillStyle=i%4===0?'#e
 </script>
 </body>
 </html>
-HTML
-
-/usr/bin/time -p node -e 'const fs=require("node:fs"),path=require("node:path");const project=process.cwd(),directory=path.join(project,"dist");if(!fs.existsSync(path.join(directory,"index.html")))throw Error("Static build is missing index.html");fs.writeFileSync(path.join(process.env.OPENCODE_WEB_DIR,"deployment-output.json"),JSON.stringify({project,directory}));'
-
-# Keep the preview server in the foreground so the controller owns its lifecycle.
-exec /usr/bin/time -p python3 -m http.server "$PORT" --bind 0.0.0.0 --directory "$PROJECT_DIR/dist"

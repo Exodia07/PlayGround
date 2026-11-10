@@ -80,7 +80,9 @@ public class GameActivity extends Activity {
                 try { Thread.sleep(12); } catch(InterruptedException ignored){}
             }
         }
-        void begin(){ mode=1;wave=1;score=0;kills=0;hp=100;mana=100;px=480;py=280;dx=0;dy=-1;enemies.clear();bolts.clear();spawnWave(); }
+        void begin(){ mode=1;wave=1;score=0;kills=0;hp=100;mana=100;px=480;py=280;dx=0;dy=-1;attackCd=magicCd=invuln=damageFlash=0;stickX=stickY=axisX=axisY=0;moveUp=moveDown=moveLeft=moveRight=attack=cast=false;movePointer=attackPointer=castPointer=-1;thumbX=moveOriginX;thumbY=moveOriginY;enemies.clear();bolts.clear();spawnWave(); }
+        void pauseGame(){ if(mode==1){mode=4;attack=cast=false;moveUp=moveDown=moveLeft=moveRight=false;stickX=stickY=axisX=axisY=0;movePointer=attackPointer=castPointer=-1;} }
+        void resumeGame(){ if(mode==4)mode=1; }
         void spawnWave(){ int amount=wave==1?5:wave==2?7:wave==3?8:0; for(int i=0;i<amount;i++){float a=(float)(i*Math.PI*2/amount)+.3f;float r=240+random.nextInt(35);int kind=wave>=3&&i==0?2:random.nextInt(4)==0?1:0;enemies.add(new Enemy(clamp(px+(float)Math.cos(a)*r,40,920),clamp(py+(float)Math.sin(a)*r,55,485),kind));} if(wave==4) enemies.add(new Enemy(735,270,2)); }
         float clamp(float v,float lo,float hi){return Math.max(lo,Math.min(hi,v));}
         void update(float dt){
@@ -109,11 +111,18 @@ public class GameActivity extends Activity {
         @Override public boolean onTouchEvent(MotionEvent e){
             float x=(e.getX()-renderOffsetX)/renderScale,y=(e.getY()-renderOffsetY)/renderScale;int action=e.getActionMasked(),idx=e.getActionIndex(),id=e.getPointerId(idx);
             if(action==MotionEvent.ACTION_DOWN||action==MotionEvent.ACTION_POINTER_DOWN){
-                if(mode!=1){begin();return true;}
+                if(mode==0||mode==2||mode==3){begin();return true;}
+                if(mode==4){
+                    if(y>=270&&y<330)resumeGame();
+                    else if(y>=330&&y<390)begin();
+                    else if(y>=390){mode=0;}
+                    else resumeGame();
+                    return true;
+                }
+                if(x>W-80&&y<80){pauseGame();return true;}
                 if(x<260&&y>300){movePointer=id;moveOriginX=105;moveOriginY=440;setStick(x,y);}
                 else if(x>805&&y>320){attackPointer=id;attack=true;}
                 else if(x>660&&y>320){castPointer=id;cast=true;}
-                else if(x>W-80&&y<80){mode=0;}
                 return true;
             }
             if(action==MotionEvent.ACTION_MOVE){for(int i=0;i<e.getPointerCount();i++){int pid=e.getPointerId(i);float tx=(e.getX(i)-renderOffsetX)/renderScale,ty=(e.getY(i)-renderOffsetY)/renderScale;if(pid==movePointer)setStick(tx,ty);}return true;}
@@ -122,12 +131,13 @@ public class GameActivity extends Activity {
         }
         void setStick(float x,float y){float vx=x-moveOriginX,vy=y-moveOriginY,d=(float)Math.hypot(vx,vy);if(d>62){vx=vx/d*62;vy=vy/d*62;}thumbX=moveOriginX+vx;thumbY=moveOriginY+vy;stickX=vx/62;stickY=vy/62;}
         @Override public boolean onKeyDown(int key,KeyEvent e){
+            if(mode==4&&key!=KeyEvent.KEYCODE_ENTER&&key!=KeyEvent.KEYCODE_BUTTON_START&&key!=KeyEvent.KEYCODE_BACK)return true;
             switch(key){case KeyEvent.KEYCODE_DPAD_UP:case KeyEvent.KEYCODE_W:moveUp=true;return true;case KeyEvent.KEYCODE_DPAD_DOWN:case KeyEvent.KEYCODE_S:moveDown=true;return true;case KeyEvent.KEYCODE_DPAD_LEFT:case KeyEvent.KEYCODE_A:moveLeft=true;return true;case KeyEvent.KEYCODE_DPAD_RIGHT:case KeyEvent.KEYCODE_D:moveRight=true;return true;
-                case KeyEvent.KEYCODE_BUTTON_A:case KeyEvent.KEYCODE_SPACE:case KeyEvent.KEYCODE_BUTTON_R1:attack=true;return true;case KeyEvent.KEYCODE_BUTTON_X:case KeyEvent.KEYCODE_BUTTON_B:case KeyEvent.KEYCODE_BUTTON_L1:cast=true;return true;case KeyEvent.KEYCODE_ENTER:case KeyEvent.KEYCODE_BUTTON_START:if(mode!=1)begin();return true;case KeyEvent.KEYCODE_BACK:mode=0;return true;}
+                case KeyEvent.KEYCODE_BUTTON_A:case KeyEvent.KEYCODE_SPACE:case KeyEvent.KEYCODE_BUTTON_R1:attack=true;return true;case KeyEvent.KEYCODE_BUTTON_X:case KeyEvent.KEYCODE_BUTTON_B:case KeyEvent.KEYCODE_BUTTON_L1:case KeyEvent.KEYCODE_C:cast=true;return true;case KeyEvent.KEYCODE_ENTER:case KeyEvent.KEYCODE_BUTTON_START:if(mode==1)pauseGame();else if(mode==4)resumeGame();else begin();return true;case KeyEvent.KEYCODE_BACK:if(mode==1)pauseGame();else if(mode==4)resumeGame();else mode=0;return true;}
             return super.onKeyDown(key,e);
         }
         @Override public boolean onKeyUp(int key,KeyEvent e){
-            switch(key){case KeyEvent.KEYCODE_DPAD_UP:case KeyEvent.KEYCODE_W:moveUp=false;return true;case KeyEvent.KEYCODE_DPAD_DOWN:case KeyEvent.KEYCODE_S:moveDown=false;return true;case KeyEvent.KEYCODE_DPAD_LEFT:case KeyEvent.KEYCODE_A:moveLeft=false;return true;case KeyEvent.KEYCODE_DPAD_RIGHT:case KeyEvent.KEYCODE_D:moveRight=false;return true;case KeyEvent.KEYCODE_BUTTON_A:case KeyEvent.KEYCODE_SPACE:case KeyEvent.KEYCODE_BUTTON_R1:attack=false;return true;case KeyEvent.KEYCODE_BUTTON_X:case KeyEvent.KEYCODE_BUTTON_B:case KeyEvent.KEYCODE_BUTTON_L1:cast=false;return true;}
+            switch(key){case KeyEvent.KEYCODE_DPAD_UP:case KeyEvent.KEYCODE_W:moveUp=false;return true;case KeyEvent.KEYCODE_DPAD_DOWN:case KeyEvent.KEYCODE_S:moveDown=false;return true;case KeyEvent.KEYCODE_DPAD_LEFT:case KeyEvent.KEYCODE_A:moveLeft=false;return true;case KeyEvent.KEYCODE_DPAD_RIGHT:case KeyEvent.KEYCODE_D:moveRight=false;return true;case KeyEvent.KEYCODE_BUTTON_A:case KeyEvent.KEYCODE_SPACE:case KeyEvent.KEYCODE_BUTTON_R1:attack=false;return true;case KeyEvent.KEYCODE_BUTTON_X:case KeyEvent.KEYCODE_BUTTON_B:case KeyEvent.KEYCODE_BUTTON_L1:case KeyEvent.KEYCODE_C:cast=false;return true;}
             return super.onKeyUp(key,e);
         }
         @Override public boolean onGenericMotionEvent(MotionEvent e){
@@ -137,29 +147,29 @@ public class GameActivity extends Activity {
         void drawGame(Canvas real){
             renderScale=Math.min(real.getWidth()/W,real.getHeight()/H);renderOffsetX=(real.getWidth()-W*renderScale)/2;renderOffsetY=(real.getHeight()-H*renderScale)/2;
             real.drawColor(Color.rgb(8,10,12));real.save();real.translate(renderOffsetX,renderOffsetY);real.scale(renderScale,renderScale);
-            if(mode==0)drawTitle(real);else{drawArena(real);drawHud(real);if(mode==2)drawEnd(real,true);if(mode==3)drawEnd(real,false);}
+            if(mode==0)drawTitle(real);else{drawArena(real);drawHud(real);if(mode==2)drawEnd(real,true);if(mode==3)drawEnd(real,false);if(mode==4)drawPause(real);}
             real.restore();
         }
         void drawTitle(Canvas c){
-            c.drawRect(0,0,W,H,grad(0,0,0,H,0xff121a21,0xff251511));
+            p.setShader(grad(0,0,0,H,0xff121a21,0xff251511));c.drawRect(0,0,W,H,p);p.setShader(null);
             for(int i=0;i<32;i++){float x=(i*173+57)%W,y=(i*97+21)%H; p.setColor(i%3==0?0x443b6a76:0x332d4b52);c.drawCircle(x,y,18+(i%5)*8,p);}
-            c.drawCircle(480,237,146,radial(480,237,5,146,0x66e8a84b,0x00101010));
+            p.setShader(radial(480,237,5,146,0x66e8a84b,0x00101010));c.drawCircle(480,237,146,p);p.setShader(null);
             drawRuin(c,185,305,1);drawRuin(c,780,300,-1);drawHero(c,480,286,0,-1,true);
             text(c,"BARAKEL",480,111,58,0xfff0d7a2,true);text(c,"THE FALLEN ANGEL",480,148,19,0xffb5c5c6,true);
             line(c,330,168,630,168,0xff97744a,2);
             text(c,"A forgotten shrine stirs beneath the ash.",480,374,19,0xffd0c4aa,false);
             text(c,"ENTER THE RUIN",480,440,20,0xffffcf76,true);
             text(c,"TAP   •   PRESS START / A",480,478,13,0xffa5aaab,true);
-            text(c,"MOVE: STICK / D-PAD     ATTACK: A     SPELL: X",480,516,12,0xff7d8b8b,true);
+            text(c,"MOVE: STICK / WASD     ATTACK: SPACE / PAD A     SPELL: C / PAD X",480,516,12,0xff7d8b8b,true);
         }
         Shader grad(float x1,float y1,float x2,float y2,int a,int b){return new LinearGradient(x1,y1,x2,y2,a,b,Shader.TileMode.CLAMP);}
-        Shader radial(float x,float y,float r1,float r2,int a,int b){return new RadialGradient(x,y,new float[]{r1,r2},new int[]{a,b},Shader.TileMode.CLAMP);}
+        Shader radial(float x,float y,float r1,float r2,int a,int b){return new RadialGradient(x,y,r2,new int[]{a,b},new float[]{Math.min(1,r1/r2),1},Shader.TileMode.CLAMP);}
         void text(Canvas c,String s,float x,float y,float size,int color,boolean bold){p.setShader(null);p.setColor(color);p.setTextSize(size);p.setTypeface(bold?Typeface.create("serif",Typeface.BOLD):Typeface.create("sans-serif",Typeface.NORMAL));p.setTextAlign(Paint.Align.CENTER);p.setShadowLayer(bold?4:0,0,2,0xff090909);c.drawText(s,x,y,p);p.clearShadowLayer();}
         void line(Canvas c,float x1,float y1,float x2,float y2,int color,float width){p.setShader(null);p.setColor(color);p.setStrokeWidth(width);p.setStrokeCap(Paint.Cap.ROUND);c.drawLine(x1,y1,x2,y2,p);}
         void circle(Canvas c,float x,float y,float r,int color){p.setShader(null);p.setColor(color);c.drawCircle(x,y,r,p);}
         void round(Canvas c,float l,float t,float r,float b,float radius,int color){p.setShader(null);p.setColor(color);c.drawRoundRect(l,t,r,b,radius,radius,p);}
         void drawArena(Canvas c){
-            c.drawRect(0,0,W,H,grad(0,0,W,H,0xff293a31,0xff18231f));
+            p.setShader(grad(0,0,W,H,0xff293a31,0xff18231f));c.drawRect(0,0,W,H,p);p.setShader(null);
             p.setShader(radial(480,260,5,520,0xff514b35,0xff111a19));c.drawRect(0,0,W,H,p);p.setShader(null);
             // worn flagstones and weeds add texture without reducing clarity
             for(int row=0;row<8;row++)for(int col=0;col<13;col++){
@@ -216,6 +226,15 @@ public class GameActivity extends Activity {
             circle(c,105,440,59,0x3cdae2df);circle(c,105,440,42,0x2aebe3ce);circle(c,thumbX,thumbY,23,0x88e9e1d0);circle(c,thumbX-5,thumbY-6,6,0x66ffffff);
             circle(c,724,438,39,0x5888dff0);circle(c,724,438,31,0x227fd2ed);text(c,"✦",724,447,29,0xffc7f5ff,true);text(c,"X",724,487,12,0xffd1e4e6,true);
             circle(c,850,426,49,0x66e8a05b);circle(c,850,426,38,0x33ffd18a);text(c,"⚔",850,438,31,0xffffe2b4,true);text(c,"A",850,487,12,0xffeed9bd,true);
+        }
+        void drawPause(Canvas c){
+            p.setColor(0xb90a0d10);c.drawRect(0,0,W,H,p);round(c,300,116,660,430,22,0xee1b2222);
+            text(c,"THE ASHES WAIT",480,177,30,0xffffd888,true);
+            line(c,352,198,608,198,0xff90734b,2);
+            text(c,"Take a breath, keeper.",480,237,17,0xffd1d1c3,false);
+            round(c,355,276,605,326,10,0xff425348);text(c,"RESUME",480,308,18,0xffffe5b7,true);
+            round(c,355,337,605,387,10,0xff63483a);text(c,"RESTART SHRINE",480,369,16,0xffffdfbb,true);
+            text(c,"RETURN TO TITLE",480,418,14,0xffb7c2b9,true);
         }
         void drawEnd(Canvas c,boolean won){
             p.setColor(0xb90a0d10);c.drawRect(0,0,W,H,p);round(c,267,122,693,420,22,0xee1b2222);

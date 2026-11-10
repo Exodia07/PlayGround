@@ -16,3 +16,8 @@ screenshots/
 .opencode-web/
 
 node_modules/
+
+# Android / Gradle build output
+android/.gradle/
+android/build/
+android/app/build/

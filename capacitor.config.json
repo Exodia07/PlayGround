@@ -1,0 +1,8 @@
+{
+  "appId": "com.barakel.fallenangel",
+  "appName": "Barakel: The Fallen Angel",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Barakel: The Fallen Angel</string>
+    <string name="title_activity_main">Barakel: The Fallen Angel</string>
+    <string name="package_name">com.barakel.fallenangel</string>
+    <string name="custom_url_scheme">com.barakel.fallenangel</string>
+</resources>

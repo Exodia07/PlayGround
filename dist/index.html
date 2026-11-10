@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#151914">
+<title>Barakel: The Fallen Angel</title>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+  <script type="module" crossorigin src="/assets/index-PdetZ6l3.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BiTcAAxs.css">
+</head>
+<body>
+<canvas id="game" aria-label="Barakel village adventure"></canvas>
+<div class="shade"></div>
+<header class="hud-top">
+  <div class="brand"><img src="/assets/logo-BcnrbmEm.png" alt=""><div><small>AN ADVENTURE RPG</small><strong>BARAKEL</strong><em>THE FALLEN ANGEL</em></div></div>
+  <div class="location"><span class="pin">⌖</span><span id="region">NORGARAM · VILLAGE</span><small id="clock">DAY 01</small></div>
+  <button class="menu-button" id="menuBtn" aria-label="Open menu">☰</button>
+</header>
+<section class="vitals" aria-label="Character status">
+  <div class="portrait"><span>B</span></div>
+  <div class="meters"><div class="meter-row"><span>BARAKEL</span><b id="level">LV 01</b></div><div class="meter"><i id="health"></i></div><div class="meter mana"><i id="mana"></i></div></div>
+  <div class="potion-count"><span>✦</span><b id="potions">3</b></div>
+</section>
+<aside class="quest"><div class="quest-mark">✧</div><div><small id="questKicker">CURRENT QUEST</small><strong id="questTitle">A SOUL IN EXILE</strong><p id="questText">Find the witch at the edge of Norgaram. She may know how to cleanse a fallen soul.</p></div></aside>
+<div class="map-panel"><img src="/assets/gNorgaram-9sceIaAS.png" alt="Map of Norgaram"><span class="map-dot"></span><b>NORGARAM</b></div>
+<div class="target" id="target"><span>⌖</span><div><b id="targetName">THE WITCH</b><small id="targetDistance">NEARBY</small></div></div>
+<div class="interaction" id="interaction"><span>✧</span><b id="interactionText">TALK</b><small>NEARBY</small></div>
+<div class="message" id="message"><b>BARAKEL</b><span id="messageText"></span></div>
+<div class="toast" id="toast"></div>
+<div class="touch-ui">
+  <div class="joystick" id="joystick"><div class="joy-ring"></div><div class="joy-knob" id="knob"></div><small>MOVE</small></div>
+  <div class="actions">
+    <button class="action utility" id="potionBtn"><span>✦</span><small>POTION</small><i>Q</i></button>
+    <button class="action utility" id="guardBtn"><span>◈</span><small>GUARD</small><i>G</i></button>
+    <button class="action magic" id="spellBtn"><span>✧</span><small>SOUL</small><i>F</i></button>
+    <button class="action attack" id="attackBtn"><span>⚔</span><small>ATTACK</small><i>SPACE</i></button>
+  </div>
+</div>
+<div class="dialog hidden" id="dialog"><div class="dialog-card"><div class="dialog-top"><span id="speaker">THE WITCH</span><button id="dialogClose">×</button></div><p id="dialogText"></p><button class="continue" id="dialogContinue">CONTINUE <span>›</span></button></div></div>
+<div class="inventory hidden" id="inventory"><div class="inventory-card"><button id="inventoryClose">×</button><small>BARAKEL'S PACK</small><h2>Inventory</h2><div class="items"><div>⚔<b>Iron blade</b><small>Equipped</small></div><div>✦<b>Healing potion</b><small id="potionStock">3 remaining</small></div><div>◈<b>Leather guard</b><small>Equipped</small></div><div>⌖<b>Old map</b><small>Norgaram & beyond</small></div></div><p>Tap the potion button in combat to restore health.</p></div></div>
+<div class="overlay" id="overlay"><div class="intro-card"><div class="intro-logo"><img src="/assets/logo-BcnrbmEm.png" alt="Barakel: The Fallen Angel"></div><div class="intro-copy"><small>THE ORIGINAL ADVENTURE · REIMAGINED FOR TOUCH</small><h1>BARAKEL<span>THE FALLEN ANGEL</span></h1><p>Cast out from heaven, Barakel returns to the lands of men. Seek the witch of Norgaram and discover a path to cleanse your soul.</p><button id="start">BEGIN YOUR JOURNEY <span>›</span></button><div class="controls-note">LEFT STICK TO MOVE <i>·</i> SWORD TO ATTACK <i>·</i> TAP PEOPLE TO TALK</div></div></div></div>
+<div class="pause hidden" id="pause"><div class="pause-card"><small>JOURNEY PAUSED</small><h2>Norgaram</h2><button id="resume">RETURN TO GAME</button><button id="inventoryBtn">OPEN INVENTORY</button><button id="restart">RESTART JOURNEY</button></div></div>
+</body>
+</html>

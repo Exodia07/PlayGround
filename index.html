@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="theme-color" content="#080b0c" />
+  <meta name="description" content="A dark 3D survival-puzzle game inspired by the Darkest Fear trilogy." />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="/assets/df1/icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="/assets/df1/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <title>Darkest Fear — The Trilogy</title>
+</head>
+<body>
+  <main id="app">
+    <canvas id="game" aria-label="3D game view"></canvas>
+    <div class="vignette"></div>
+    <div class="grain"></div>
+
+    <section id="home" class="screen active">
+      <div class="home-top"><div class="brand-mark"><span class="brand-icon">✦</span> NIGHTFALL<br><small>INTERACTIVE</small></div><div class="top-right"><span class="status-dot"></span> 3 CHAPTERS · 12 MISSIONS</div></div>
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> A THREE-DIMENSIONAL SURVIVAL SAGA</p>
+        <h1>DARKEST<br><i>FEAR</i></h1>
+        <p class="hero-sub">The dark is alive. Keep the light close.</p>
+        <div class="hero-actions"><button id="continueBtn" class="primary-btn">ENTER THE DARK <span>↗</span></button><button id="howBtn" class="text-btn">HOW TO SURVIVE <span>⌄</span></button></div>
+      </div>
+      <div class="home-foot"><span>INSPIRED BY THE CLASSIC MOBILE TRILOGY</span><span class="scroll-hint">SCROLL TO EXPLORE <b>↓</b></span><span>© 2026 · A FAN-MADE REIMAGINING</span></div>
+      <div class="home-shade"></div>
+    </section>
+
+    <section id="chapters" class="screen chapter-screen">
+      <header class="screen-header"><button class="back-btn" data-back="home">← <span>BACK</span></button><div class="header-kicker">SELECT YOUR NIGHTMARE</div><div class="chapter-progress">THE COMPLETE SAGA <span>01 — 03</span></div></header>
+      <div class="chapter-heading"><p class="eyebrow">THREE TALES. ONE UNENDING NIGHT.</p><h2>Choose a <i>chapter</i></h2><p>Each story begins where the light ends.</p></div>
+      <div id="chapterList" class="chapter-list"></div>
+      <div class="screen-foot"><span>YOUR PROGRESS IS SAVED ON THIS DEVICE</span><span>USE WASD / ARROWS OR TOUCH CONTROLS</span></div>
+    </section>
+
+    <section id="gameHud" class="game-hud">
+      <div class="hud-top"><button id="pauseBtn" class="icon-btn">Ⅱ</button><div class="mission-title"><span id="missionChapter">CHAPTER I</span><strong id="missionName">THE HOLLOW</strong></div><div class="objective"><span class="objective-icon">⌑</span><span id="keyCount">0 / 3</span><small>SEALS</small></div></div>
+      <div class="hud-bottom"><div class="battery"><div class="battery-icon">ϟ</div><div class="battery-copy"><span>TORCH CHARGE</span><div class="battery-track"><i id="batteryBar"></i></div></div><b id="batteryText">100%</b></div><div id="hint" class="hint">FIND THE THREE SEALS</div><button id="torchBtn" class="torch-btn" aria-label="Toggle torch">✦ <span>TORCH</span></button></div>
+      <div id="toast" class="toast"></div>
+    </section>
+
+    <div id="touchControls" class="touch-controls">
+      <div class="dpad"><button data-dir="up" class="up">▲</button><button data-dir="left" class="left">◀</button><button data-dir="down" class="down">▼</button><button data-dir="right" class="right">▶</button></div>
+      <button id="touchTorch" class="touch-torch"><span>✦</span><small>LIGHT</small></button>
+    </div>
+
+    <section id="pauseModal" class="modal"><div class="modal-card"><p class="eyebrow">TAKE A BREATH</p><h2>Paused <i>in the dark</i></h2><p>Listen carefully. They can hear your footsteps.</p><button id="resumeBtn" class="primary-btn">RETURN TO THE NIGHT <span>↗</span></button><button id="restartBtn" class="text-btn">RESTART MISSION</button><button id="menuBtn" class="text-btn">BACK TO CHAPTERS</button></div></section>
+    <section id="resultModal" class="modal"><div class="modal-card"><p id="resultKicker" class="eyebrow">THE LIGHT HOLDS</p><h2 id="resultTitle">You survived <i>the night.</i></h2><p id="resultText">The door opens onto another darkness.</p><button id="resultAction" class="primary-btn">NEXT MISSION <span>↗</span></button><button id="resultMenu" class="text-btn">BACK TO CHAPTERS</button></div></section>
+    <section id="helpModal" class="modal"><div class="modal-card help-card"><button class="close-modal" data-close="helpModal">×</button><p class="eyebrow">FIELD NOTES</p><h2>How to <i>survive</i></h2><div class="help-row"><span>01</span><p><b>Find three seals</b><br>Search the rooms and corridors to unlock the exit.</p></div><div class="help-row"><span>02</span><p><b>Keep your torch burning</b><br>Darkness hides the Hollows. A charged beam drives them back.</p></div><div class="help-row"><span>03</span><p><b>Follow the light</b><br>Use WASD / arrow keys, the on-screen pad, or tap a nearby tile.</p></div><button class="primary-btn" data-close="helpModal">I UNDERSTAND <span>↗</span></button></div></section>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

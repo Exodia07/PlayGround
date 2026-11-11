@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "Darkest Fear — The Trilogy",
+  "short_name": "Darkest Fear",
+  "description": "A dark 3D survival-puzzle game inspired by the Darkest Fear trilogy.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080b0c",
+  "theme_color": "#080b0c",
+  "icons": [
+    {
+      "src": "/assets/df1/icon.png",
+      "sizes": "58x58",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import android.view.WindowManager;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 import android.graphics.Canvas;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -48,7 +49,11 @@ public class GameActivity extends Activity {
 
     private class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
         static final float W=960, H=540;
-        final Paint p=new Paint(3);
+        static final int PIXEL_SCALE=3;
+        final Paint p=new Paint(0);
+        final Paint pixelPaint=new Paint(0);
+        final Bitmap pixelFrame=Bitmap.createBitmap((int)W/PIXEL_SCALE,(int)H/PIXEL_SCALE,Bitmap.Config.ARGB_8888);
+        final Canvas pixelCanvas=new Canvas(pixelFrame);
         final Random random=new Random(19);
         final ArrayList<Enemy> enemies=new ArrayList<>();
         final ArrayList<Bolt> bolts=new ArrayList<>();
@@ -62,7 +67,20 @@ public class GameActivity extends Activity {
         float moveOriginX=105,moveOriginY=440,thumbX=105,thumbY=440;
         long lastFrame=0;
         float renderScale=1,renderOffsetX=0,renderOffsetY=0;
-        GameView() { super(GameActivity.this); getHolder().addCallback(this); setFocusable(true); setFocusableInTouchMode(true); }
+        GameView() {
+            super(GameActivity.this);
+            getHolder().addCallback(this);
+            setFocusable(true);
+            setFocusableInTouchMode(true);
+            p.setAntiAlias(false);
+            p.setDither(false);
+            p.setFilterBitmap(false);
+            p.setStyle(Paint.Style.FILL);
+            pixelPaint.setAntiAlias(false);
+            pixelPaint.setDither(false);
+            pixelPaint.setFilterBitmap(false);
+            pixelPaint.setStyle(Paint.Style.FILL);
+        }
         @Override public void surfaceCreated(SurfaceHolder h) { startLoop(); }
         @Override public void surfaceChanged(SurfaceHolder h,int f,int w,int hh) {}
         @Override public void surfaceDestroyed(SurfaceHolder h) { stopLoop(); }
@@ -151,16 +169,17 @@ public class GameActivity extends Activity {
             real.restore();
         }
         void drawTitle(Canvas c){
-            p.setShader(grad(0,0,0,H,0xff121a21,0xff251511));c.drawRect(0,0,W,H,p);p.setShader(null);
-            for(int i=0;i<32;i++){float x=(i*173+57)%W,y=(i*97+21)%H; p.setColor(i%3==0?0x443b6a76:0x332d4b52);c.drawCircle(x,y,18+(i%5)*8,p);}
-            p.setShader(radial(480,237,5,146,0x66e8a84b,0x00101010));c.drawCircle(480,237,146,p);p.setShader(null);
-            drawRuin(c,185,305,1);drawRuin(c,780,300,-1);drawHero(c,480,286,0,-1,true);
-            text(c,"BARAKEL",480,111,58,0xfff0d7a2,true);text(c,"THE FALLEN ANGEL",480,148,19,0xffb5c5c6,true);
-            line(c,330,168,630,168,0xff97744a,2);
-            text(c,"A forgotten shrine stirs beneath the ash.",480,374,19,0xffd0c4aa,false);
-            text(c,"ENTER THE RUIN",480,440,20,0xffffcf76,true);
-            text(c,"TAP   •   PRESS START / A",480,478,13,0xffa5aaab,true);
-            text(c,"MOVE: STICK / WASD     ATTACK: SPACE / PAD A     SPELL: C / PAD X",480,516,12,0xff7d8b8b,true);
+            p.setShader(grad(0,0,0,H,0xff0b1014,0xff1d120e));c.drawRect(0,0,W,H,p);p.setShader(null);
+            for(int i=0;i<28;i++){float x=(i*171+63)%W,y=(i*89+19)%H; p.setColor(i%3==0?0x443d4d5f:0x332a3940);c.drawCircle(x,y,12+(i%4)*7,p);}
+            p.setShader(radial(480,230,8,150,0x66c77d44,0x00100d0b));c.drawCircle(480,230,150,p);p.setShader(null);
+            drawRuin(c,185,304,1);drawRuin(c,780,300,-1);drawHero(c,480,286,0,-1,true);
+            text(c,"BARAKEL",480,111,58,0xfff0d7a2,true);
+            text(c,"THE FALLEN ANGEL",480,148,19,0xffc7d1d5,true);
+            line(c,320,167,640,167,0xff8a663a,2);
+            text(c,"A forgotten shrine stirs beneath the ash.",480,370,19,0xffd9c7b1,false);
+            text(c,"ENTER THE RUIN",480,440,20,0xffffd299,true);
+            text(c,"TAP   •   PRESS START / A",480,478,13,0xffd4c7b0,true);
+            text(c,"MOVE: STICK / WASD     ATTACK: SPACE / PAD A     SPELL: C / PAD X",480,516,12,0xff97a2a6,true);
         }
         Shader grad(float x1,float y1,float x2,float y2,int a,int b){return new LinearGradient(x1,y1,x2,y2,a,b,Shader.TileMode.CLAMP);}
         Shader radial(float x,float y,float r1,float r2,int a,int b){return new RadialGradient(x,y,r2,new int[]{a,b},new float[]{Math.min(1,r1/r2),1},Shader.TileMode.CLAMP);}
@@ -169,78 +188,79 @@ public class GameActivity extends Activity {
         void circle(Canvas c,float x,float y,float r,int color){p.setShader(null);p.setColor(color);c.drawCircle(x,y,r,p);}
         void round(Canvas c,float l,float t,float r,float b,float radius,int color){p.setShader(null);p.setColor(color);c.drawRoundRect(l,t,r,b,radius,radius,p);}
         void drawArena(Canvas c){
-            p.setShader(grad(0,0,W,H,0xff293a31,0xff18231f));c.drawRect(0,0,W,H,p);p.setShader(null);
-            p.setShader(radial(480,260,5,520,0xff514b35,0xff111a19));c.drawRect(0,0,W,H,p);p.setShader(null);
-            // worn flagstones and weeds add texture without reducing clarity
+            p.setShader(grad(0,0,W,H,0xff1a2421,0xff101915));c.drawRect(0,0,W,H,p);p.setShader(null);
+            p.setShader(radial(480,260,6,520,0xff4b3e2d,0xff111915));c.drawRect(0,0,W,H,p);p.setShader(null);
             for(int row=0;row<8;row++)for(int col=0;col<13;col++){
                 float x=col*82+(row%2)*37-24,y=52+row*66;int shade=((row*17+col*13)%5);
-                p.setColor(new int[]{0x1833b5a0,0x183b9c8b,0x1e8e8162,0x153fa69a,0x1e172c2a}[shade]);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1);c.drawRoundRect(x,y,x+72,y+55,8,8,p);p.setStyle(Paint.Style.FILL);
-                if((row*7+col*11)%9==0){circle(c,x+16,y+18,2,0x66849a62);circle(c,x+20,y+18,2,0x66849a62);}
+                int[] palette={0x1d3f3b31,0x1d3d4d43,0x1d534c3a,0x183d4230,0x1e1f2420};
+                p.setColor(palette[shade]);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1);c.drawRoundRect(x,y,x+72,y+55,8,8,p);p.setStyle(Paint.Style.FILL);
+                if((row*7+col*11)%9==0){circle(c,x+16,y+18,2,0x66869466);circle(c,x+20,y+18,2,0x66869466);}
             }
-            // ancient paving / altar
-            round(c,385,176,575,347,22,0x443c2e20);round(c,398,187,562,333,16,0x77211817);round(c,411,199,549,320,12,0x88392b22);
-            circle(c,480,260,47,0x552f1d14);circle(c,480,256,33,0x66d38b39);circle(c,480,256,18,0xff271d19);circle(c,480,256,6,0xffe6bc62);
+            round(c,385,176,575,347,22,0x443d2e1d);round(c,398,187,562,333,16,0x7729231b);round(c,411,199,549,320,12,0x8834312b);
+            circle(c,480,260,47,0x552c241c);circle(c,480,256,33,0x66b69a56);circle(c,480,256,18,0xff1d1c18);circle(c,480,256,6,0xffe9c36b);
             drawRuin(c,56,131,1);drawRuin(c,900,139,-1);drawRuin(c,126,464,1);drawRuin(c,835,456,-1);
-            for(Bolt b:bolts){circle(c,b.x,b.y,11,0x668dd8ff);circle(c,b.x,b.y,6,0xffd8f6ff);}
+            for(Bolt b:bolts){circle(c,b.x,b.y,11,0x6689d9ff);circle(c,b.x,b.y,6,0xffd3f1ff);}
             for(Enemy e:enemies)drawEnemy(c,e);
             drawHero(c,px,py,dx,dy,invuln>0);
-            if(damageFlash>0){p.setColor(0x33ff2d24);c.drawRect(0,0,W,H,p);}
+            if(damageFlash>0){p.setColor(0x33ff463a);c.drawRect(0,0,W,H,p);}
         }
         void drawRuin(Canvas c,float x,float y,float side){
             c.save();c.translate(x,y);c.scale(side,1);
-            p.setShader(null);p.setColor(0x55391d16);c.drawRect(-22,-34,22,10,p);p.setColor(0xff393c36);c.drawRect(-19,-36,-8,3,p);c.drawRect(6,-43,18,3,p);p.setColor(0xff55564b);c.drawRect(-24,-40,-6,-34,p);c.drawRect(3,-47,22,-41,p);p.setColor(0xff8e8063);c.drawRect(-15,-31,-12,-12,p);c.drawRect(11,-38,14,-16,p);p.setColor(0xff252b25);c.drawRect(-10,-25,7,5,p);c.restore();
+            p.setColor(0x553d2f22);c.drawRect(-22,-34,22,10,p);
+            p.setColor(0xff3d3b35);c.drawRect(-19,-36,-8,3,p);c.drawRect(6,-43,18,3,p);
+            p.setColor(0xff5f584f);c.drawRect(-24,-40,-6,-34,p);c.drawRect(3,-47,22,-41,p);
+            p.setColor(0xff8a7d62);c.drawRect(-15,-31,-12,-12,p);c.drawRect(11,-38,14,-16,p);
+            p.setColor(0xff272b2f);c.drawRect(-10,-25,7,5,p);
+            c.restore();
         }
         void drawHero(Canvas c,float x,float y,float vx,float vy,boolean hurt){
             c.save();c.translate(x,y);float angle=(float)Math.toDegrees(Math.atan2(vy,vx))+90;c.rotate(angle);
-            circle(c,0,9,17,0x55201814);
-            p.setShader(grad(-14,-4,14,16,0xff653b3b,0xff211d28));p.setColor(Color.WHITE);c.drawOval(-15,-8,15,19,p);p.setShader(null);
-            // ivory mantle and dark armor
-            p.setColor(0xffc7bca0);c.drawOval(-11,-15,11,11,p);p.setColor(0xff31404b);c.drawRoundRect(-8,-12,8,12,5,5,p);
-            circle(c,0,-13,8,hurt?0xffffaaaa:0xffe6c58e);circle(c,0,-13,5,0xffd9d4c1);circle(c,0,-13,2,0xff28313b);
-            // winged shoulder details and sword
-            p.setColor(0xffd3c7a6);c.drawOval(-17,-18,-8,-8,p);c.drawOval(8,-18,17,-8,p);
-            line(c,7,0,23,-14,0xffd6d5c9,4);line(c,3,2,12,-7,0xffb48d58,3);
-            circle(c,0,-29,4,0xffffd78b);circle(c,0,-29,2,0xfffff2c7);
+            circle(c,0,9,17,0x55271b17);
+            p.setColor(hurt?0xff7a4a3c:0xffb58c64);c.drawRect(-14,-7,14,17,p);
+            p.setColor(0xffd2b98a);c.drawRect(-10,-17,10,8,p);p.setColor(0xff2d3840);c.drawRoundRect(-8,-12,8,12,4,4,p);
+            circle(c,0,-13,8,hurt?0xffffb3a3:0xffecce8d);circle(c,0,-13,5,0xffd9d4c3);circle(c,0,-13,2,0xff27343e);
+            p.setColor(0xffd7cba7);c.drawOval(-17,-18,-8,-8,p);c.drawOval(8,-18,17,-8,p);
+            line(c,7,0,25,-15,0xffdcdbd0,4);line(c,3,2,12,-7,0xffb28545,3);
+            circle(c,0,-29,4,0xffffd595);circle(c,0,-29,2,0xfffff2d6);
             c.restore();
         }
         void drawEnemy(Canvas c,Enemy e){
-            c.save();c.translate(e.x,e.y);circle(c,0,10,e.kind==2?25:17,0x66301412);
+            c.save();c.translate(e.x,e.y);circle(c,0,10,e.kind==2?25:17,0x662a2123);
             if(e.kind==2){
-                p.setColor(e.hitFlash>0?0xffffb3a5:0xff632c36);c.drawOval(-23,-28,23,21,p);p.setColor(0xffb24845);c.drawOval(-19,-18,19,17,p);p.setColor(0xff3d2933);c.drawOval(-12,-34,12,-8,p);p.setColor(0xffe1ad62);c.drawRect(-19,-31,-13,-43,p);c.drawRect(13,-31,19,-43,p);circle(c,-7,-13,3,0xffffca65);circle(c,7,-13,3,0xffffca65);line(c,-9,16,-14,25,0xff9a4944,5);line(c,9,16,14,25,0xff9a4944,5);
+                p.setColor(e.hitFlash>0?0xffffb18d:0xff6e3a38);c.drawOval(-23,-28,23,21,p);p.setColor(0xffab5048);c.drawOval(-19,-18,19,17,p);p.setColor(0xff2c1f2a);c.drawOval(-12,-34,12,-8,p);p.setColor(0xffdea765);c.drawRect(-19,-31,-13,-43,p);c.drawRect(13,-31,19,-43,p);circle(c,-7,-13,3,0xffffd082);circle(c,7,-13,3,0xffffd082);line(c,-9,16,-14,25,0xff8a3d39,5);line(c,9,16,14,25,0xff8a3d39,5);
             }else if(e.kind==1){
-                p.setColor(e.hitFlash>0?0xffffc1a8:0xff6e794d);c.drawOval(-16,-22,16,18,p);p.setColor(0xff5d5547);c.drawRect(-14,-19,14,-7,p);p.setColor(0xffffd28c);c.drawRect(-10,-17,-5,-13,p);c.drawRect(5,-17,10,-13,p);line(c,-13,15,-18,23,0xff6e794d,6);line(c,13,15,18,23,0xff6e794d,6);
+                p.setColor(e.hitFlash>0?0xffffc09f:0xff6a7c41);c.drawOval(-16,-22,16,18,p);p.setColor(0xff4f4d35);c.drawRect(-14,-19,14,-7,p);p.setColor(0xffffd892);c.drawRect(-10,-17,-5,-13,p);c.drawRect(5,-17,10,-13,p);line(c,-13,15,-18,23,0xff69763e,6);line(c,13,15,18,23,0xff69763e,6);
             }else{
-                p.setColor(e.hitFlash>0?0xffffddd0:0xff77716a);c.drawOval(-13,-20,13,17,p);p.setColor(0xffb9b29d);c.drawOval(-10,-22,10,-9,p);circle(c,-4,-15,2,0xffd74439);circle(c,4,-15,2,0xffd74439);line(c,-8,13,-12,22,0xff8c8679,4);line(c,8,13,12,22,0xff8c8679,4);
+                p.setColor(e.hitFlash>0?0xffffe6d6:0xff7f796b);c.drawOval(-13,-20,13,17,p);p.setColor(0xffd0c3a7);c.drawOval(-10,-22,10,-9,p);circle(c,-4,-15,2,0xffd74839);circle(c,4,-15,2,0xffd74839);line(c,-8,13,-12,22,0xff737061,4);line(c,8,13,12,22,0xff737061,4);
             }
             c.restore();
-            if(e.kind==2){round(c,e.x-28,e.y-40,e.x+28,e.y-35,3,0xff341b1a);round(c,e.x-28,e.y-40,e.x-28+56*(e.hp/5f),e.y-35,3,0xffd45e4c);}
+            if(e.kind==2){round(c,e.x-28,e.y-40,e.x+28,e.y-35,3,0xff2f1d1c);round(c,e.x-28,e.y-40,e.x-28+56*(e.hp/5f),e.y-35,3,0xffd95a48);}
         }
         void drawHud(Canvas c){
-            p.setShader(grad(0,0,0,74,0xee101619,0x00101619));c.drawRect(0,0,W,74,p);p.setShader(null);
-            text(c,"BARAKEL",94,27,19,0xffe6d3ad,true);text(c,"SHRINE  •  WAVE "+wave+" / 4",170,51,12,0xffaeb9ad,true);
-            round(c,238,17,438,31,7,0xff302827);round(c,240,19,240+194*hp/100f,29,5,hp<30?0xffd95048:0xffb6584b);text(c,"VITALITY",338,47,11,0xffddc7b1,true);
-            round(c,462,17,632,31,7,0xff232c33);round(c,464,19,464+166*mana/100f,29,5,0xff64b1c2);text(c,"AETHER",548,47,11,0xffb4d2d7,true);
-            text(c,"SOULS  "+score,764,28,15,0xffe5cb91,true);text(c,"FOES  "+enemies.size(),764,49,12,0xffb3b8ad,true);
-            round(c,905,12,944,54,10,0x883b4642);text(c,"Ⅱ",924,39,20,0xffe7dcbf,true);
-            // touch controls are unobtrusive and remain anchored to the corners
-            circle(c,105,440,59,0x3cdae2df);circle(c,105,440,42,0x2aebe3ce);circle(c,thumbX,thumbY,23,0x88e9e1d0);circle(c,thumbX-5,thumbY-6,6,0x66ffffff);
-            circle(c,724,438,39,0x5888dff0);circle(c,724,438,31,0x227fd2ed);text(c,"✦",724,447,29,0xffc7f5ff,true);text(c,"X",724,487,12,0xffd1e4e6,true);
-            circle(c,850,426,49,0x66e8a05b);circle(c,850,426,38,0x33ffd18a);text(c,"⚔",850,438,31,0xffffe2b4,true);text(c,"A",850,487,12,0xffeed9bd,true);
+            p.setShader(grad(0,0,0,74,0xee0d1214,0x00101214));c.drawRect(0,0,W,74,p);p.setShader(null);
+            text(c,"BARAKEL",94,27,19,0xffe6d2ae,true);text(c,"SHRINE  •  WAVE "+wave+" / 4",170,51,12,0xffbac0b9,true);
+            round(c,238,17,438,31,7,0xff2d2a29);round(c,240,19,240+194*hp/100f,29,5,hp<30?0xffd95a46:0xffaf674f);text(c,"VITALITY",338,47,11,0xffddc7a6,true);
+            round(c,462,17,632,31,7,0xff1f2930);round(c,464,19,464+166*mana/100f,29,5,0xff68a4bf);text(c,"AETHER",548,47,11,0xffb4d0d7,true);
+            text(c,"SOULS  "+score,764,28,15,0xffe5c78d,true);text(c,"FOES  "+enemies.size(),764,49,12,0xffaab2aa,true);
+            round(c,905,12,944,54,10,0x883d3f3d);text(c,"Ⅱ",924,39,20,0xffebdcc6,true);
+            circle(c,105,440,59,0x3cdfe4dc);circle(c,105,440,42,0x2ac7d7d1);circle(c,thumbX,thumbY,23,0x88e8e5da);circle(c,thumbX-5,thumbY-6,6,0x66ffffff);
+            circle(c,724,438,39,0x5885d4f0);circle(c,724,438,31,0x2279add7);text(c,"✦",724,447,29,0xffd4effa,true);text(c,"X",724,487,12,0xffd5e5eb,true);
+            circle(c,850,426,49,0x66d6a765);circle(c,850,426,38,0x33ffd38d);text(c,"⚔",850,438,31,0xffffe2b4,true);text(c,"A",850,487,12,0xffefdcb8,true);
         }
         void drawPause(Canvas c){
-            p.setColor(0xb90a0d10);c.drawRect(0,0,W,H,p);round(c,300,116,660,430,22,0xee1b2222);
-            text(c,"THE ASHES WAIT",480,177,30,0xffffd888,true);
-            line(c,352,198,608,198,0xff90734b,2);
-            text(c,"Take a breath, keeper.",480,237,17,0xffd1d1c3,false);
-            round(c,355,276,605,326,10,0xff425348);text(c,"RESUME",480,308,18,0xffffe5b7,true);
-            round(c,355,337,605,387,10,0xff63483a);text(c,"RESTART SHRINE",480,369,16,0xffffdfbb,true);
-            text(c,"RETURN TO TITLE",480,418,14,0xffb7c2b9,true);
+            p.setColor(0xb90c1315);c.drawRect(0,0,W,H,p);round(c,300,116,660,430,22,0xee1a1c1d);
+            text(c,"THE ASHES WAIT",480,177,30,0xffffd58b,true);
+            line(c,352,198,608,198,0xff8d6e45,2);
+            text(c,"Take a breath, keeper.",480,237,17,0xffd2d2c8,false);
+            round(c,355,276,605,326,10,0xff46544d);text(c,"RESUME",480,308,18,0xffffe8bf,true);
+            round(c,355,337,605,387,10,0xff5c4537);text(c,"RESTART SHRINE",480,369,16,0xffffdfb9,true);
+            text(c,"RETURN TO TITLE",480,418,14,0xffbac8be,true);
         }
         void drawEnd(Canvas c,boolean won){
-            p.setColor(0xb90a0d10);c.drawRect(0,0,W,H,p);round(c,267,122,693,420,22,0xee1b2222);
-            line(c,320,177,640,177,0xff90734b,2);text(c,won?"THE VEIL IS LIFTED":"FALLEN IN THE ASH",480,218,31,won?0xffffd888:0xffe5a099,true);
-            text(c,won?"The shrine grows quiet. The lost souls are free.":"The darkness closes around the shrine.",480,265,16,0xffd1d1c3,false);
-            text(c,"SOULS RELEASED   "+score,480,310,16,0xffe7cc96,true);text(c,"TAP   •   PRESS START / A TO PLAY AGAIN",480,367,14,0xffd5e0dc,true);
+            p.setColor(0xb90c1315);c.drawRect(0,0,W,H,p);round(c,267,122,693,420,22,0xee1a1c1d);
+            line(c,320,177,640,177,0xff8d6e45,2);text(c,won?"THE VEIL IS LIFTED":"FALLEN IN THE ASH",480,218,31,won?0xffffd58b:0xffe5a498,true);
+            text(c,won?"The shrine grows quiet. The lost souls are free.":"The darkness closes around the shrine.",480,265,16,0xffd4d0c6,false);
+            text(c,"SOULS RELEASED   "+score,480,310,16,0xffe5c990,true);text(c,"TAP   •   PRESS START / A TO PLAY AGAIN",480,367,14,0xffdbe4df,true);
         }
     }
 }

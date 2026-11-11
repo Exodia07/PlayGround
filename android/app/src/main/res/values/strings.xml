@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Darkest Fear</string>
-    <string name="title_activity_main">Darkest Fear</string>
-    <string name="package_name">com.nightfall.darkestfear</string>
-    <string name="custom_url_scheme">com.nightfall.darkestfear</string>
-</resources>

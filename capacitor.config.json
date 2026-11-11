@@ -1,9 +1,0 @@
-{
-  "appId": "com.nightfall.darkestfear",
-  "appName": "Darkest Fear",
-  "webDir": "dist",
-  "bundledWebRuntime": false,
-  "android": {
-    "allowMixedContent": false
-  }
-}
